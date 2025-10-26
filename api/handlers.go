@@ -1,40 +1,32 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-resty/resty/v2"
+	"fmt"
 	"net/http"
-	"net/url"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func HealthCheck(c *gin.Context) {
 	ResponseJSON(c, http.StatusOK, "Healthy and up!", nil)
 }
 
-func GetLoginToken() (*TokenResponse, error) {
-	client := resty.New()
-
-	resp, err := client.R().
-		SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetFormData(map[string]string{
-			"grant_type":    "client_credentials",
-			"client_id":     "your-client-id",
-			"client_secret": "your-client-secret",
-		}).
-		Post("https://accounts.spotify.com/api/token")
-
+func GetPlaylistSongs(c *gin.Context) {
+	data, err := FetchPlaylistTracks("6gUTRutxUlCS2RGV0otHeo", 10, 0) //TODO: Get from user
 	if err != nil {
-		return nil, err
+		fmt.Print(err)
+		ResponseJSON(c, 500, "Something went wrong while getting tracks from the playlist", data)
+		return
 	}
+	ResponseJSON(c, http.StatusOK, "Playlist tracks fetched successfully!", data)
+}
 
-	var token TokenResponse
-
-	// Convert response into JSON
-	if err := json.Unmarshal(resp.Body(), &token); err != nil {
-		return nil, err
+func GetSpotifyToken(c *gin.Context) {
+	token, err := FetchSpotifyToken()
+	if err != nil {
+		fmt.Print(err)
+		ResponseJSON(c, 500, "Something went wrong while getting Spotify Login Token", token)
+		return
 	}
-
-	return &token, nil
-
+	ResponseJSON(c, http.StatusOK, "Token fetched successfully!", token)
 }
