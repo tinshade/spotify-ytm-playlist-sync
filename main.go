@@ -12,6 +12,6 @@ func main() {
 
 	r.GET("/health", api.HealthCheck)
 	r.GET("/token", api.GetSpotifyToken)
-	r.GET("/get-playlist-songs", api.GetPlaylistSongs)
+	r.GET("/get-playlist-songs/:playlistID", api.GetPlaylistSongs)
 	r.Run(":8000")
 }
